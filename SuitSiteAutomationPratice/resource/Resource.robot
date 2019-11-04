@@ -5,6 +5,9 @@ Library     String
 *** Variables ***
 ${URL}              http://automationpractice.com
 ${BROWSER}          chrome
+&{CLIENT}           firstName=lulu     lastName=zinho      password=luluzinho    address=72 Stanley St New Haven
+...                 city=New Haven     state=7             postalCode=06511      mobilePhone=999999999       
+@{SUMMER_DRESSES}   Printed Summer Dress   Printed Summer Dress   Printed Chiffon Dress
 
 *** Keywords ***
 ### Setup e Teardown
@@ -58,24 +61,33 @@ Clicar no botão superior direito “Sign in”
     Wait Until Page Contains Element     xpath=//*[@id="header"]//a[@class="login"][contains(text(),"Sign in")]
     Click Element                        xpath=//*[@id="header"]//a[@class="login"][contains(text(),"Sign in")]  
 
+
+Criar email customizado
+    [Arguments]             ${firstName}      ${lastName}
+    ${RANDOM_STRING}        Generate Random String
+    ${CUSTOM_EMAIL}         Set Variable      ${firstName}${lastName}${RANDOM_STRING}@testerobot.com
+    Log                     ${CUSTOM_EMAIL}
+    [Return]                ${CUSTOM_EMAIL}
+
+
 Inserir um e-mail válido
     Wait Until Element is Visible        id=email_create
-    ${EMAIL}                             Generate Random String
-    Input Text                           id=email_create            ${EMAIL}@test.com
+    ${EMAIL}                             Criar email customizado    ${CLIENT.firstName}     ${CLIENT.lastName}
+    Input Text                           id=email_create            ${EMAIL}
 
 Clicar no botão "Create na account"
     Click Element   id=SubmitCreate
 
 Preencher os campos obrigatórios
     Wait Until Page Contains Element  id=customer_firstname 
-    Input Text                        id=customer_firstname       lulu
-    Input Text                        id=customer_lastname        zinho
-    Input Text                        id=passwd                   luluzinho
-    Input Text                        id=address1                 72 Stanley St New Haven
-    Input Text                        id=city                     New Haven
-    Select From List By Value         id=id_state                 7
-    Input Text                        id=postcode                 06511
-    Input Text                        id=phone_mobile             999999999
+    Input Text                        id=customer_firstname       lulu                      ${CLIENT.firstName}
+    Input Text                        id=customer_lastname        zinho                     ${CLIENT.lastName}
+    Input Text                        id=passwd                   luluzinho                 ${CLIENT.password}
+    Input Text                        id=address1                 72 Stanley St New Haven   ${CLIENT.address}
+    Input Text                        id=city                     New Haven                 ${CLIENT.city}
+    Select From List By Value         id=id_state                 7                         ${CLIENT.state}
+    Input Text                        id=postcode                 06511                     ${CLIENT.postalCode}
+    Input Text                        id=phone_mobile             999999999                 ${CLIENT.mobilePhone}
 
 Clicar em "Register" para finalizar o cadastro
     Click Element       id=submitAccount
@@ -89,15 +101,15 @@ Conferir se o produto "${PRODUCT}" foi listado nos resultados do site
 
 Conferir mensagem de erro "${ALERT_MESSAGE}"
     Wait Until Element Is Visible       xpath=//*[@id="center_column"]/p[@class="alert alert-warning"]
-    Element Text Should Be              xpath=//*[@id="center_column"]/p[@class="alert alert-warning"]    ${ALERT_MESSAGE}
+    Element Text Should Be              xpath=//*[@id="center_column"]/p[@class="alert alert-warning"]   ${ALERT_MESSAGE}
 
 Conferir se a página exibe os produtos da sub-categoria "${SUBCATEGORY}"
     Wait Until Element Is Visible    xpath=//*[@id="center_column"]//span[@class="cat-name"]
     Title Should Be                  Summer Dresses - My Store 
     Page Should Contain Element      xpath=//*[@id="center_column"]//span[@class="cat-name"]
-    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[1]/div/div[2]/h5/a[@title="Printed Summer Dress"]
-    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[2]/div/div[2]/h5/a[@title="Printed Summer Dress"]
-    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[3]/div/div[2]/h5/a[@title="Printed Chiffon Dress"]
+    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[1]/div/div[2]/h5/a[@title="${SUMMER_DRESSES[0]}"]
+    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[2]/div/div[2]/h5/a[@title="${SUMMER_DRESSES[1]}"]
+    Page Should Contain Element      xpath=//*[@id="center_column"]/ul/li[3]/div/div[2]/h5/a[@title="${SUMMER_DRESSES[2]}"]
 
 Conferir se o produto foi adicionado no carrinho com seus devidos dados e valores
     Wait Until Element Is Visible       xpath=//*[@id="cart_title"][contains(text(),"Shopping-cart summary")]
